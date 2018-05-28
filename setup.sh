@@ -1,5 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
+###
+# Setup this server if it is running Ubuntu
+###
 setup_ubuntu() {
   ## Update Ubuntu
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
@@ -18,8 +21,41 @@ setup_ubuntu() {
 
 
 ###
+# Check when was the last time this script was ran and updates it is >24h
+# Return 0 if up-to-date or successfully update; 1 if no network connection
+##
+auto_update_script() {
+  if ! ping -q -c 1 -W 1 google.com >/dev/null; then
+    echo "===> Internet access not available. Skip auto-update"
+    return 1
+  fi
+  file="last_setup.time"
+  LASTTIME=0
+  if [ -s $file ]; then
+    LASTTIME=`cat $file`
+  fi
+
+  NOW=`date +%s`  
+  # Update last_setup.time to now
+  echo "$NOW" > last_setup.time
+
+  let YESTERDAY="$NOW - (3600 * 24)"
+  if [ "$YESTERDAY" -gt "$LASTTIME" ]; then
+    echo "  Updating this script since last pull is >24h"
+    git pull
+    printf "  Restarting setup script \n\n"
+    exec $(readlink -f "$0")
+  fi
+  return 0
+}
+
+###
 # Main script
 ###
+printf "*** RoboNation's server setup script \n  (note: robonation password is on the back of the server)\n"
+
+## 1. Check if script is up-to-date
+auto_update_script;
 DISTRO="$(uname -v)"
 
 case $DISTRO in
