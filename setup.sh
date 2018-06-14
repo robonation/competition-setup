@@ -32,7 +32,6 @@ setup_ubuntu() {
   sudo apt-get install -y python-software-properties debconf-utils
   echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
   sudo apt-get -y install oracle-java8-installer    #apt-get is unable to find java9 these days... revisit later
-  sudo apt install oracle-java9-set-default
 
   ## Install Chrome in Launcher
   gsettings set com.canonical.Unity.Launcher favorites "['application://org.gnome.Nautilus.desktop', 'application://google-chrome.desktop', 'application://firefox.desktop', 'application://org.gnome.Software.desktop', 'application://unity-control-center.desktop', 'unity://running-apps', 'application://gnome-terminal.desktop', 'unity://expo-icon', 'unity://devices']" || echo "No X11 available while running this script"
@@ -83,6 +82,8 @@ setup_roboboat() {
  
   sudo mkdir -p /etc/roboboat
   sudo chown robonation:robonation /etc/roboboat
+  sudo cp $file/roboboat-server/roboboat-server /etc/init.d/roboboat-server
+  sudo update-rc.d roboboat-server defaults
 }
 
 ###
