@@ -18,9 +18,9 @@ setup_ubuntu() {
   sudo apt-get -y update 
 
   ## Install key apps
-  sudo apt-get -y install vim google-chrome-stable curl \ ## Install key apps
-						  openssh-server \ 	## Setup SSH
-						  git maven python-software-properties debconf-utils ## Setup build tools
+  sudo apt-get -y install vim google-chrome-stable curl \
+						  openssh-server \
+						  git maven python-software-properties debconf-utils
   echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
   sudo apt-get -y install oracle-java8-installer    #apt-get is unable to find java9 these days... revisit later
 
