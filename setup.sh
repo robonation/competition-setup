@@ -15,21 +15,12 @@ setup_ubuntu() {
   ## Update Ubuntu
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
-  sudo apt-get -y update #fails the first time on brand new ubuntu install, so do it twice!
-  sudo apt-get -y update
+  sudo apt-get -y update 
 
   ## Install key apps
-  sudo apt-get -y install vim
-  sudo apt-get -y install google-chrome-stable
-  sudo apt-get -y install curl
-
-  ## Setup SSH
-  sudo apt-get -y install openssh-server
-
-  ## Setup build tools
-  sudo apt-get -y install git
-  sudo apt-get -y install maven
-  sudo apt-get install -y python-software-properties debconf-utils
+  sudo apt-get -y install vim google-chrome-stable curl \ ## Install key apps
+						  openssh-server \ 	## Setup SSH
+						  git maven python-software-properties debconf-utils ## Setup build tools
   echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
   sudo apt-get -y install oracle-java8-installer    #apt-get is unable to find java9 these days... revisit later
 
