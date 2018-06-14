@@ -18,7 +18,7 @@ setup_ubuntu() {
   sudo apt-get -y update 
 
   ## Install key apps
-  sudo apt-get -y install vim google-chrome-stable curl \
+  sudo apt-get -y install vim google-chrome-stable curl jq \
 						  openssh-server \
 						  git maven python-software-properties debconf-utils
   echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
