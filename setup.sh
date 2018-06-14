@@ -1,9 +1,17 @@
 #!/bin/bash
 
+COMPETITION="RoboBoat"
+
+HERE=$(cd -- $(dirname ${BASH_SOURCE[0]}) > /dev/null && pwd)
+cd -- "$HERE"
+
 ###
 # Setup this server if it is running Ubuntu
 ###
 setup_ubuntu() {
+  ## Install new apt-get repo
+  sudo add-apt-repository -y ppa:webupd8team/java
+
   ## Update Ubuntu
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
@@ -13,10 +21,25 @@ setup_ubuntu() {
   ## Install key apps
   sudo apt-get -y install vim
   sudo apt-get -y install google-chrome-stable
+  sudo apt-get -y install curl
+
+  ## Setup SSH
+  sudo apt-get -y install openssh-server
+
+  ## Setup build tools
   sudo apt-get -y install git
+  sudo apt-get -y install maven
+  sudo apt-get install -y python-software-properties debconf-utils
+  echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
+  sudo apt-get -y install oracle-java8-installer    #apt-get is unable to find java9 these days... revisit later
+  sudo apt install oracle-java9-set-default
 
   ## Install Chrome in Launcher
-  gsettings set com.canonical.Unity.Launcher favorites "['application://org.gnome.Nautilus.desktop', 'application://google-chrome.desktop', 'application://firefox.desktop', 'application://org.gnome.Software.desktop', 'application://unity-control-center.desktop', 'unity://running-apps', 'application://gnome-terminal.desktop', 'unity://expo-icon', 'unity://devices']"
+  gsettings set com.canonical.Unity.Launcher favorites "['application://org.gnome.Nautilus.desktop', 'application://google-chrome.desktop', 'application://firefox.desktop', 'application://org.gnome.Software.desktop', 'application://unity-control-center.desktop', 'unity://running-apps', 'application://gnome-terminal.desktop', 'unity://expo-icon', 'unity://devices']" || echo "No X11 available while running this script"
+
+  ## Make this script run as a service
+  sudo cp competition-setup /etc/init.d/competition-setup
+  sudo update-rc.d competition-setup defaults
 }
 
 
@@ -50,9 +73,41 @@ auto_update_script() {
 }
 
 ###
+# RoboBoat setup
+###
+setup_roboboat() {
+  file="/home/robonation/roboboat"
+  if [ ! -d $file ]; then
+    git clone https://github.com/robonation/roboboat-server.git "$file/roboboat-server/"
+  fi
+ 
+  sudo mkdir -p /etc/roboboat
+  sudo chown robonation:robonation /etc/roboboat
+}
+
+###
+# RobotX setup
+###
+setup_robotx() {
+  echo "RobotX not yet implemented"
+}
+
+###
+#
+###
+check_git_setup() {
+  file="/home/robonation/.git-credentials"
+  if [ ! -f $file ]; then
+    printf "*** Unable to setup competition software as git-setup is not complete on this server. Please run 'git config --global credential.helper store && git clone https://github.com/robonation/roboboat-server /tmp/roboboat-server && rm -rf /tmp/roboboat-server'\n\n"
+    exit 1
+  fi
+}
+
+###
 # Main script
 ###
 printf "*** RoboNation's server setup script \n  (note: robonation password is on the back of the server)\n"
+
 
 ## 1. Check if script is up-to-date
 auto_update_script;
@@ -62,4 +117,13 @@ case $DISTRO in
   *"Ubuntu"*) setup_ubuntu;;
   *) echo "This script does not support '$DISTRO'";;
 esac
+
+check_git_setup;
+case $COMPETITION in
+  *"RoboBoat"*) setup_roboboat;;
+  *"RobotX"*) setup_robotx;;
+  *) echo "This script does not support competition '$COMPETITION'";;
+esac
+
+printf "*** RoboNation's server setup script successfull completed its run ***\n"
 exit 0
