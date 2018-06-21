@@ -24,13 +24,16 @@ setup_ubuntu() {
   echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
   sudo apt-get -y install oracle-java8-installer    #apt-get is unable to find java9 these days... revisit later
 
+  ## Clean up old packages
+  sudo apt -y autoremove
+
   ## Install Chrome in Launcher
   gsettings set com.canonical.Unity.Launcher favorites "['application://org.gnome.Nautilus.desktop', 'application://google-chrome.desktop', 'application://firefox.desktop', 'application://org.gnome.Software.desktop', 'application://unity-control-center.desktop', 'unity://running-apps', 'application://gnome-terminal.desktop', 'unity://expo-icon', 'unity://devices']" || echo "No X11 available while running this script"
 
   ##Boot to console
   sudo sed -i 's/^GRUB_CMDLINE_LINUX=""//' /etc/default/grub && sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/\n### Boot to UI\n#GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"\n#GRUB_CMDLINE_LINUX=""\n\n### Boot to console\nGRUB_CMDLINE_LINUX_DEFAULT="text"\nGRUB_TERMINAL=console\n/g' /etc/default/grub
   sudo update-grub
-
+  sudo systemctl set-default multi-user.target
 
   ## Make this script run as a service
   sudo cp competition-setup /etc/init.d/competition-setup
